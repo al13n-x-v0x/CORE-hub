@@ -1,0 +1,27 @@
+﻿import {mkdir,writeFile} from 'node:fs/promises';
+import sharp from 'sharp';
+import {rankSvg,quoteSvg,bannerSvg,leaderboardSvg,png,animatedCardPayload} from '../src/cards.js';
+import {welcomeSvg,welcomeFrames} from '../src/welcome.js';
+const dir=new URL('../previews/',import.meta.url);await mkdir(dir,{recursive:true});
+const cards={};
+for(const theme of ['mint','sunset','ice','gold'])cards['profile-'+theme]=rankSvg({name:'Nova.exe',xp:2750,coins:1520,rank:3,nitro:theme!=='mint',theme,bio:'Building worlds. Breaking personal bests.'});
+cards.quote=quoteSvg({text:'Small commits. Big progress.',author:'CORE original'});
+cards['custom-quote']=quoteSvg({text:'Build something you want to come back to.',author:'Nova.exe'});
+cards['community-quote']=quoteSvg({text:'One more round. This time we have a plan.',author:'PixelPilot',label:'COMMUNITY QUOTE'});
+const welcome={name:'Nova.exe',server:'CORE — Gaming, chatting and coding',count:128};
+cards.welcome=welcomeSvg(welcome);
+cards.nitro=bannerSvg({label:'COSMETIC PERK • NOT DISCORD NITRO',title:'CORE NITRO',subtitle:'Profile badge + custom card themes for 7 days.',detail:'500 earned coins. No payment, gift code, or Discord subscription.',theme:'gold'});
+cards.gift=bannerSvg({label:'PRETEND GIFT • NOT DISCORD NITRO',title:'A gift for Nova.exe',subtitle:'7 days of CORE cosmetic perks have been added.',detail:'Profile badge + color themes. No links or login needed.',theme:'gold'});
+cards.server=bannerSvg({label:'SERVER SNAPSHOT',title:'CORE Gaming Hub',subtitle:'128 members · 24 channels · 16 roles',detail:'Created 2025-01-01 · 4 boosts'});
+cards.leaderboard=leaderboardSvg({rows:[{name:'Astra',score:4500},{name:'Kai',score:3275},{name:'Nova.exe',score:2750},{name:'PixelPilot',score:1850},{name:'ByteKnight',score:1200}]});
+cards['empty-leaderboard']=leaderboardSvg({rows:[]});
+cards['minecraft-online']=bannerSvg({label:'MINECRAFT / ONLINE',title:'play.core.example',subtitle:'18 / 50 players · Java',detail:'Survival. Build together. Leave a mark.'});
+cards['minecraft-offline']=bannerSvg({label:'MINECRAFT / OFFLINE',title:'play.core.example',subtitle:'The public status service reports this server offline.',detail:'Status provider caches responses for up to 5 minutes.',theme:'sunset'});
+cards.longtext=quoteSvg({text:'A'.repeat(220),author:'VeryLongUsernameThatTestsTheLimitsOfThisCard'});
+const tiles=[];let i=0;
+for(const [name,svg]of Object.entries(cards)){const buf=await png(svg);await writeFile(new URL(name+'.png',dir),buf);tiles.push({input:await sharp(buf).resize(480,270,{fit:'contain',background:'#080f16'}).png().toBuffer(),left:(i%2)*480,top:Math.floor(i/2)*270});i++;}
+await sharp({create:{width:960,height:Math.ceil(i/2)*270,channels:3,background:'#080f16'}}).composite(tiles).jpeg({quality:90}).toFile(new URL('all-cards.jpg',dir).pathname.replace(/^\/(\w:)/,'$1'));
+const gifPayload=await animatedCardPayload(welcomeFrames(welcome),'welcome.gif');
+await writeFile(new URL('welcome.gif',dir),gifPayload.files[0].attachment);
+await writeFile(new URL('GALLERY.md',dir),'# CORE card gallery\n\nSynthetic examples rendered by the actual bot card functions.\n\n## Animated welcome\n\n![animated welcome](welcome.gif)\n\n'+Object.keys(cards).map(name=>`## ${name}\n\n![${name}](${name}.png)\n`).join('\n'));
+console.log(`Rendered ${i} card previews plus contact sheet.`);

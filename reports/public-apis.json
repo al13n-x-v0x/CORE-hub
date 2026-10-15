@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-15T00:35:04.630Z",
+  "results": [
+    {
+      "service": "GamerPower",
+      "ok": true,
+      "detail": "Read-only JSON/schema check; no bot messages sent"
+    },
+    {
+      "service": "FreeToGame",
+      "ok": true,
+      "detail": "Read-only JSON/schema check; no bot messages sent"
+    },
+    {
+      "service": "nekos.best",
+      "ok": true,
+      "detail": "Read-only JSON/schema check; no bot messages sent"
+    },
+    {
+      "service": "Minecraft status",
+      "ok": true,
+      "detail": "Read-only JSON/schema check; no bot messages sent"
+    }
+  ]
+}
